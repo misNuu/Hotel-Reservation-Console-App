@@ -5,6 +5,8 @@
 
 using namespace std;
 
+const int MAX_ROOMS = 300;
+
 struct Guest {
 	string fullName;
 	int reservationId = 0;
@@ -26,7 +28,7 @@ struct Room {
 Room GenerateRooms();
 void MainMenu(Room&);
 void PrintMenuChoices();
-void ReservationMenu(Room&, Guest[300]);
+void ReservationMenu(Room&, Guest[MAX_ROOMS]); // Number of max rooms and max guests is the same
 bool isAvailable(Room&);
 int CountHowManyAvailable(Room&);
 
@@ -76,7 +78,8 @@ void MainMenu(Room &room)
 		case 2:
 			// Search reservations
 		case 3:
-			cout << guests[0].fullName;
+			cout << guests[0].fullName << endl;
+			cout << guests[1].fullName << endl;
 			break;
 		case 4:
 			cout << "Exiting program..." << endl;
@@ -130,13 +133,11 @@ int CountHowManyAvailable(Room &room)
 
 void ReservationMenu(Room &room, Guest guests[])
 {
-	int i = 0; i += 1; // For multiple guests
-	string name;
-	int userChoice;
+	static int i = 0; // Iterator used when reserving rooms for multiple/different people
 	bool roomIsAvailable;
 	cout << "We currently have a total of " << CountHowManyAvailable(room) << " rooms available for you." << endl;
 	
-	cout << "Enter a room number that you would like to reserve or type draw to draw a random number" << endl << "Rooms 1 to " << room.roomsCount / 2 << " are for a single person";
+	cout << "Enter a room number that you would like to reserve" << endl << "Rooms 1 to " << room.roomsCount / 2 << " are for a single person";
 	cout << " and rooms " << room.roomsCount / 2 + 1 << " to " << room.roomsCount << " are for two people" << endl;
 	cin >> guests[i].roomNumber;
 	roomIsAvailable = isAvailable(room, guests[i].roomNumber);
@@ -151,22 +152,16 @@ void ReservationMenu(Room &room, Guest guests[])
 			cin.ignore(); 
 			getline(cin, guests[i].fullName);
 
-
-
+			room.roomsAvailability[guests[i].roomNumber] = 0; // Mark room as reserved by inserting a value of 0 (false)
+			break;
 		}
 		else {
 			cout << endl << "Selected room is already reserved! Try another one." << endl;
 			break;
 		}
-	} while (true);
-}
+	} while (roomIsAvailable);
 
-void MakeReservation(Room& room, int userChoice)
-{
-	Guest guest;
-	//guest.reservationId = 
-	
+	cout << endl <<"Room reserved succesfully for: " << guests[i].fullName << endl;
 
-
-	//cout << endl << userChoice;
+	i += 1; // Iterate by 1 so when this function is called next time it won't overwrite guests
 }
