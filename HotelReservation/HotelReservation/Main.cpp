@@ -6,6 +6,7 @@
 using namespace std;
 
 const int MAX_ROOMS = 300;
+const int MAX_GUESTS = MAX_ROOMS; // Max number of guests is the same as max rooms since double sized rooms are reserved for one name/person only
 
 struct Guest {
 	string fullName;
@@ -15,20 +16,18 @@ struct Guest {
 };
 
 struct Room {
-
 	vector<bool> roomsAvailability;
 	int roomsCount = 0;
 	int singleRoomPrice = 100;
 	int doubleRoomPrice = 150;
 	int howManyNights = 0;
-	float discount = 0;
 };
 
 // Function prototypes
 Room GenerateRooms();
 void MainMenu(Room&);
 void PrintMenuChoices();
-void ReservationMenu(Room&, Guest[MAX_ROOMS]); // Number of max rooms and max guests is the same
+void ReservationMenu(Room&, Guest[MAX_GUESTS]); 
 bool isAvailable(Room&);
 int CountHowManyAvailable(Room&);
 
@@ -48,7 +47,7 @@ Room GenerateRooms()
 
 	srand(time(0));
 
-	room.roomsCount = 2 * (rand() % 100 + 40) ; // Generate an even room count between 40 - 300
+	room.roomsCount = 2 * (rand() % MAX_ROOMS + 40) ; // Generate an even room count between 40 - 300
 
 	for (int i = 0; i < room.roomsCount; i++) { // Initialize all rooms as available
 		room.roomsAvailability.push_back(1);
@@ -76,10 +75,17 @@ void MainMenu(Room &room)
 			ReservationMenu(room, guests);
 			break;
 		case 2:
-			// Search reservations
+			cout << "------------------------------------------------" << endl;
+			cout << "Type\t\tPrice ($/night)" << endl;
+			cout << "------------------------------------------------" << endl;
+			cout << "Single\t\t100" << endl;
+			cout << "Double\t\t150" << endl;
+			cout << "------------------------------------------------" << endl;
+			break;
 		case 3:
-			cout << guests[0].fullName << endl;
-			cout << guests[1].fullName << endl;
+			for (int i = 0; i < MAX_GUESTS; i++) {
+				cout << guests[i].roomNumber << "\t" << guests[i].fullName << endl;
+			}
 			break;
 		case 4:
 			cout << "Exiting program..." << endl;
@@ -93,8 +99,8 @@ void PrintMenuChoices()
 {
 	cout << "What would you like to do?" << endl;
 	cout << "1. Reserve a room" << endl;
-	cout << "2. Search room reservations" << endl;
-	cout << "3. Testing" << endl;
+	cout << "2. Check pricing" << endl;
+	cout << "3. Search room reservations" << endl;
 	cout << "4. Exit program" << endl;
 }
 
@@ -133,7 +139,7 @@ int CountHowManyAvailable(Room &room)
 
 void ReservationMenu(Room &room, Guest guests[])
 {
-	static int i = 0; // Iterator used when reserving rooms for multiple/different people
+	static int i = 0; 
 	bool roomIsAvailable;
 	cout << "We currently have a total of " << CountHowManyAvailable(room) << " rooms available for you." << endl;
 	
@@ -163,5 +169,5 @@ void ReservationMenu(Room &room, Guest guests[])
 
 	cout << endl <<"Room reserved succesfully for: " << guests[i].fullName << endl;
 
-	i += 1; // Iterate by 1 so when this function is called next time it won't overwrite guests
+	i+=1; // Iterate index by 1 everytime this function is called, so next guest will be stored in next index in the array
 }
