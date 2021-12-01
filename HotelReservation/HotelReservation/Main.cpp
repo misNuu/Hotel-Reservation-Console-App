@@ -5,14 +5,17 @@
 
 using namespace std;
 
-const int MAX_ROOMS = 300;
+const int MAX_ROOMS = 5;
 const int MAX_GUESTS = MAX_ROOMS; // Max number of guests is the same as max rooms since double sized rooms are reserved for one name/person only
 
 struct Guest {
 	string fullName;
+	string address;
+	int phoneNum = 0;
 	int reservationId = 0;
 	int roomNumber = 0;
 	int howManyNights = 0;
+	float totalBill = 0.0;
 };
 
 struct Room {
@@ -47,9 +50,9 @@ Room GenerateRooms()
 
 	srand(time(0));
 
-	room.roomsCount = 2 * (rand() % MAX_ROOMS + 40) ; // Generate an even room count between 40 - 300
+	room.roomsCount = 2 * (rand() % MAX_ROOMS + 1) ; // Generate an even room count between 40 - 300
 
-	for (int i = 0; i < room.roomsCount; i++) { // Initialize all rooms as available
+	for (int i = 0; i <= room.roomsCount; i++) { // Initialize all rooms as available
 		room.roomsAvailability.push_back(1);
 	}
 
@@ -62,7 +65,7 @@ void MainMenu(Room &room)
 {
 	Guest guests[300];
 	int userChoice;
-	room.roomsAvailability[3] = 0;
+	//room.roomsAvailability[3] = 0;
 	do {
 		PrintMenuChoices();
 
@@ -83,8 +86,9 @@ void MainMenu(Room &room)
 			cout << "------------------------------------------------" << endl;
 			break;
 		case 3:
+			cout << "Room number\tName\t\t\tAddress\t\t\tID" << endl;
 			for (int i = 0; i < MAX_GUESTS; i++) {
-				cout << guests[i].roomNumber << "\t" << guests[i].fullName << endl;
+				cout << guests[i].roomNumber << "\t\t" << guests[i].fullName << "\t\t" << guests[i].address << "\t\t" << guests[i].reservationId << endl;
 			}
 			break;
 		case 4:
@@ -117,22 +121,12 @@ bool isAvailable(Room &room, int roomNumber)
 int CountHowManyAvailable(Room &room)
 {
 	int totalCount = 0;
-	int singleCount = 0;
-	int doubleCount = 0;
 
-	for (int i = room.roomsCount / 2; i < room.roomsCount; i++) { // Count how many double rooms are available
+	for (int i = 0; i < room.roomsCount; i++) {
 		if (room.roomsAvailability[i] == 1) {
-			doubleCount += 1;
+			totalCount += 1;
 		}
 	}
-
-	for (int i = room.roomsCount / 2; i > 0; i--) { // Count how many single rooms are available
-		if (room.roomsAvailability[i] == 1) {
-			singleCount += 1;
-		}
-	}
-
-	totalCount = singleCount + doubleCount;
 
 	return totalCount;
 }
@@ -146,28 +140,44 @@ void ReservationMenu(Room &room, Guest guests[])
 	cout << "Enter a room number that you would like to reserve" << endl << "Rooms 1 to " << room.roomsCount / 2 << " are for a single person";
 	cout << " and rooms " << room.roomsCount / 2 + 1 << " to " << room.roomsCount << " are for two people" << endl;
 	cin >> guests[i].roomNumber;
+
 	roomIsAvailable = isAvailable(room, guests[i].roomNumber);
 
 	do {
 		if (roomIsAvailable)
 		{
-			cout << endl << "For how many nights would you like to stay?" << endl;
+			cout << endl << "How many nights would you like to stay?: " << endl;
 			cin >> guests[i].howManyNights;
 		
-			cout << endl << "Enter your full name (Name Surname)" << endl;
+			cout << endl << "Enter your full name: " << endl;
 			cin.ignore(); 
 			getline(cin, guests[i].fullName);
 
+			cout << endl << "Enter your address: " << endl;
+			//cin.ignore();
+			getline(cin, guests[i].address);
+
+			guests[i].reservationId = rand() % 99999 + 1000; // Generate a reservation id for the guest between 10000 - 99999
+
 			room.roomsAvailability[guests[i].roomNumber] = 0; // Mark room as reserved by inserting a value of 0 (false)
+	
+			if (guests[i].roomNumber <= room.roomsCount / 2)
+			{
+				guests[i].totalBill = guests[i].howManyNights * room.singleRoomPrice;
+			}
+			else if (guests[i].roomNumber > room.roomsCount / 2) {
+				guests[i].totalBill = guests[i].howManyNights * room.doubleRoomPrice;
+			}
+
+			cout << endl << "Room reserved succesfully for: " << guests[i].fullName << endl;
+			cout << "Total bill: " << guests[i].totalBill << endl;
+			cout << "------------------------------------------------" << endl;
 			break;
 		}
 		else {
 			cout << endl << "Selected room is already reserved! Try another one." << endl;
-			break;
 		}
 	} while (roomIsAvailable);
-
-	cout << endl <<"Room reserved succesfully for: " << guests[i].fullName << endl;
 
 	i+=1; // Iterate index by 1 everytime this function is called, so next guest will be stored in next index in the array
 }
