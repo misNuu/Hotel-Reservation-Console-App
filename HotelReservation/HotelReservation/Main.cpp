@@ -34,6 +34,9 @@ void ReservationMenu(Room&, Guest[MAX_GUESTS]);
 bool isAvailable(Room&);
 int CountHowManyAvailable(Room&);
 
+// Generates discount based on random number
+float Discount(float bill);
+
 int main()
 {
 	cout << "Welcome to the hotel room reservation program!" << endl << endl;
@@ -135,6 +138,7 @@ void ReservationMenu(Room &room, Guest guests[])
 {
 	static int i = 0; 
 	bool roomIsAvailable;
+	float bill = 0;
 	cout << "We currently have a total of " << CountHowManyAvailable(room) << " rooms available for you." << endl;
 	
 	cout << "Enter a room number that you would like to reserve" << endl << "Rooms 1 to " << room.roomsCount / 2 << " are for a single person";
@@ -157,20 +161,21 @@ void ReservationMenu(Room &room, Guest guests[])
 			//cin.ignore();
 			getline(cin, guests[i].address);
 
-			guests[i].reservationId = rand() % 99999 + 1000; // Generate a reservation id for the guest between 10000 - 99999
+			guests[i].reservationId = rand() % 99999 + 1000; // Generate a reservation id for the guest
 
 			room.roomsAvailability[guests[i].roomNumber] = 0; // Mark room as reserved by inserting a value of 0 (false)
 	
 			if (guests[i].roomNumber <= room.roomsCount / 2)
 			{
-				guests[i].totalBill = guests[i].howManyNights * room.singleRoomPrice;
+				bill = guests[i].howManyNights * room.singleRoomPrice;
 			}
 			else if (guests[i].roomNumber > room.roomsCount / 2) {
-				guests[i].totalBill = guests[i].howManyNights * room.doubleRoomPrice;
+				bill = guests[i].howManyNights * room.doubleRoomPrice;
 			}
+			guests[i].totalBill = Discount(bill); // Checks if discount will be applied to total price
 
 			cout << endl << "Room reserved succesfully for: " << guests[i].fullName << endl;
-			cout << "Total bill: " << guests[i].totalBill << endl;
+			cout << "Total bill: " << guests[i].totalBill << " $" << endl;
 			cout << "------------------------------------------------" << endl;
 			break;
 		}
@@ -180,4 +185,20 @@ void ReservationMenu(Room &room, Guest guests[])
 	} while (roomIsAvailable);
 
 	i+=1; // Iterate index by 1 everytime this function is called, so next guest will be stored in next index in the array
+}
+
+float Discount(float bill)
+{
+	int rnd = rand() % 3 + 1;
+	if (rnd == 1) {
+		cout << "You got a 10% discount!" << endl;
+		return bill - (bill * 0.10); // 10 % discount
+	}
+	else if (rnd == 2) {
+		cout << "You got a 20% discount!" << endl;
+		return bill - (bill * 0.20); // 20 % discount
+	}
+	else {
+		return bill;
+	}
 }
