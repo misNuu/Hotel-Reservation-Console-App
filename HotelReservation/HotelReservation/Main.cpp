@@ -5,16 +5,16 @@
 
 using namespace std;
 
-const int MAX_ROOMS = 5;
+const int MAX_ROOMS = 300;
 const int MAX_GUESTS = MAX_ROOMS; // Max number of guests is the same as max rooms since double sized rooms are reserved for one name/person only
 
 struct Guest {
 	string fullName;
-	int phoneNum = 0;
 	int reservationId = 0;
 	int roomNumber = 0;
+	string roomType;
 	int howManyNights = 0;
-	float totalBill = 0.0;
+	int totalBill = 0;
 };
 
 struct Room {
@@ -25,15 +25,15 @@ struct Room {
 };
 
 // Function prototypes
-Room GenerateRooms();
-void MainMenu(Room&);
-void PrintMenuChoices();
-void ReservationMenu(Room&, Guest[MAX_GUESTS]);
-void SearchReservations(Room&, Guest[MAX_GUESTS]);
-bool isAvailable(Room&);
-int CountHowManyAvailable(Room&);
-int IntInput(); // Used for all integer inputs, handles errors
-float Discount(float bill); // Generates discount based on random number
+Room initializeRooms();
+void mainMenu(Room&);
+void printMenuChoices();
+void reservationMenu(Room&, Guest[MAX_GUESTS]);
+void searchReservations(Room&, Guest[MAX_GUESTS]);
+bool isAvailable(Room&); // Checks if room is available for reservation
+int countHowManyAvailable(Room&);
+int intInput(); // Used for all integer inputs, handles errors
+double discount(int bill); // Generates discount based on random number
 
 int main()
 {
@@ -46,14 +46,14 @@ int main()
 ================================)" << endl;
 
 	cout << "Welcome to the hotel room reservation program!" << endl << endl;
-	Room room = GenerateRooms();
+	Room room = initializeRooms();
 
-	MainMenu(room);
+	mainMenu(room);
 
 	return 0;
 }
 
-int IntInput()
+int intInput()
 {
 	int choice = 0;
 
@@ -70,38 +70,38 @@ int IntInput()
 	return choice;
 }
 
-Room GenerateRooms()
+Room initializeRooms()
 {
 	Room room;
 
 	srand(time(0));
 
-	room.roomsCount = 2 * (rand() % MAX_ROOMS + 1) ; // Generate an even room count between 40 - 300
+	//room.roomsCount = 2 * (rand() % MAX_ROOMS + 1) ; // Generate an even room count between 40 - 300
+	room.roomsCount = MAX_ROOMS;
 
 	for (int i = 0; i <= room.roomsCount; i++) { // Initialize all rooms as available
 		room.roomsAvailability.push_back(1);
 	}
-
 
 	//cout << "Generated a total of " << room.roomsCount << " rooms!" << endl << endl;
 
 	return room;
 }
 
-void MainMenu(Room &room)
+void mainMenu(Room &room)
 {
 	Guest guests[MAX_GUESTS];
 	int userChoice;
 	do {
-		PrintMenuChoices();
+		printMenuChoices();
 		cout << endl << "Your choice: ";
-		userChoice = IntInput();
+		userChoice = intInput();
 
 		switch (userChoice)
 		{
 		case 1:
 			cout << "------------------------------------------------" << endl;
-			ReservationMenu(room, guests);
+			reservationMenu(room, guests);
 			break;
 		case 2:
 			cout << "------------------------------------------------" << endl;
@@ -113,7 +113,7 @@ void MainMenu(Room &room)
 			break;
 		case 3:
 			cout << "------------------------------------------------" << endl;
-			SearchReservations(room, guests);
+			searchReservations(room, guests);
 			break;
 		case 4:
 			cout << "Exiting program..." << endl;
@@ -126,7 +126,7 @@ void MainMenu(Room &room)
 	} while (userChoice != 4);
 }
 
-void PrintMenuChoices()
+void printMenuChoices()
 {
 	cout << "What would you like to do?" << endl;
 	cout << "1. Reserve a room" << endl;
@@ -145,51 +145,53 @@ bool isAvailable(Room &room, int roomNumber)
 	}
 }
 
-int CountHowManyAvailable(Room &room)
+int countHowManyAvailable(Room& room)
 {
-	int totalCount = 0;
-
-	for (int i = 0; i < room.roomsCount; i++) {
+	int count = 0;
+	for (int i = 1; i <= room.roomsCount; i++) {
 		if (room.roomsAvailability[i] == 1) {
-			totalCount += 1;
+			count += 1;
 		}
 	}
-
-	return totalCount;
+	return count;
 }
 
-void ReservationMenu(Room& room, Guest guests[])
+void reservationMenu(Room& room, Guest guests[])
 {
 	static int i = 0;
 	bool roomIsAvailable;
-	float bill = 0;
+	int bill = 0;
 	int choice;
 	int roomNumber = 0;
-	room.roomsAvailability[1] = 0;
 	int rnd;
 
-	cout << "We have a total of " << room.roomsCount << " rooms. Of which " << CountHowManyAvailable(room) << " are available right now!" << endl;
+	cout << "We have a total of " << countHowManyAvailable(room) << " room(s) free." << endl;
 	cout << "Rooms 1 - " << room.roomsCount / 2 << " are for a single person (single rooms)" << endl << "Rooms " << room.roomsCount / 2 + 1 << " - " << room.roomsCount << " are for two people (double rooms)" << endl << endl;
 	cout << "You can choose a room yourself or we can choose for you. What would you like to do?" << endl << "1. Let us choose for you" << endl << "2. I'll pick myself" << endl;
 
 	cout << endl << "Your choice: ";
-	choice = IntInput();
+	choice = intInput();
 
 	switch (choice) {
 	case 1:
-		rnd = rand() % room.roomsCount + 1;
-		roomIsAvailable = isAvailable(room, rnd);
-		while (!roomIsAvailable) {
+		// If generated room number is not available, generate a new one
+		do {
 			rnd = rand() % room.roomsCount + 1;
-		}
-		roomNumber = rnd; // Generates a room number
+			roomIsAvailable = isAvailable(room, rnd);
+			if (countHowManyAvailable(room) == 0) { // If no rooms are available, stop trying to generate a room number and break out of loop
+				break;
+			}
+		} while (!roomIsAvailable);
+
+		roomNumber = rnd;
 		cout << "We picked room number " << roomNumber << " for you." << endl;
 		break;
 	case 2:
 		do {
 			cout << "Enter a room number that you would like to reserve: ";
-			choice = IntInput();
+			choice = intInput();
 		} while (choice > room.roomsCount || choice <= 0);
+
 		roomNumber = choice;
 		break;
 	default:
@@ -201,16 +203,13 @@ void ReservationMenu(Room& room, Guest guests[])
 	if (roomIsAvailable)
 	{
 		cout << endl << "How many nights would you like to stay?: ";
-		choice = IntInput();
+		choice = intInput();
 		guests[i].howManyNights = choice;
 
 		cout << endl << "Enter your full name: ";
+		//cin >> guests[i].fullName;
 		cin.ignore();
 		getline(cin, guests[i].fullName);
-
-		cout << endl << "Enter your phone number: ";
-		choice = IntInput();
-		guests[i].phoneNum = choice;
 
 		guests[i].roomNumber = roomNumber;
 
@@ -223,23 +222,24 @@ void ReservationMenu(Room& room, Guest guests[])
 		else if (guests[i].roomNumber > room.roomsCount / 2) {
 			bill = guests[i].howManyNights * room.doubleRoomPrice;
 		}
-		guests[i].totalBill = Discount(bill); // Checks if discount will be applied to total price
 
 		room.roomsAvailability[guests[i].roomNumber] = 0; // Mark room as reserved by inserting a value of 0 (false)
 
 		cout << endl << "Room number " << guests[i].roomNumber << " reserved succesfully for: " << guests[i].fullName << endl;
 		cout << "Reservation ID: " << guests[i].reservationId << endl;
-		cout << "Total bill: " << guests[i].totalBill << " $" << endl;
+		guests[i].totalBill = discount(bill); // Checks if a discount will be applied to total price
+		cout << "Total bill: " << guests[i].totalBill << "$" << endl;
 		cout << "------------------------------------------------" << endl;
 	}
 	else {
-		cout << endl << "That room is already reserved! Try again." << endl << endl;
+		cout << endl << "THAT ROOM IS ALREADY RESERVED! Try another one." << endl << endl;
+		cout << "------------------------------------------------" << endl;
 	}
 	
 	i+=1; // Iterate index by 1 everytime this function is called, so next guest will be stored in next index in the array
 }
 
-void SearchReservations(Room& room, Guest guests[])
+void searchReservations(Room& room, Guest guests[])
 {
 	int choice;
 	bool found;
@@ -248,20 +248,20 @@ void SearchReservations(Room& room, Guest guests[])
 	cout << "You can search reservations either by name or by reservation ID." << endl;
 	cout << "What would you like to to?" << endl << "1. Search by reservation ID" << endl << "2. Search by name" << endl << endl;
 	cout << "Your choice: ";
-	choice = IntInput();
+	choice = intInput();
 
 	switch (choice)
 	{
 		case 1:
 			int idToSearch;
 			cout << "Enter reservation ID to search: ";
-			idToSearch = IntInput();
+			idToSearch = intInput();
 
 			for (int i = 0; i <= MAX_GUESTS; i++) { //Linear search for searching reservation names by reservation ID
 				if (idToSearch == guests[i].reservationId) {
-					cout << endl << "Name\t\t\t" << "Room\t\t" << "Phone\t\t\t" << "Bill\t\t" << "ID\t\t" << endl;
+					cout << endl << "Name\t\t\t" << "Room\t\t" << "Bill\t\t" << "ID\t\t" << endl;
 					count += 1;
-					cout << guests[i].fullName << "\t\t" << guests[i].roomNumber << "\t\t" << guests[i].phoneNum << "\t\t" << guests[i].totalBill << "$" << "\t\t" << guests[i].reservationId << endl;
+					cout << guests[i].fullName << "\t\t" << guests[i].roomNumber << "\t\t" << guests[i].totalBill << "$" << "\t\t" << guests[i].reservationId << endl;
 					found = true;
 				}
 				else if (count == 0) {
@@ -280,9 +280,9 @@ void SearchReservations(Room& room, Guest guests[])
 
 			for (int i = 0; i <= MAX_GUESTS; i++) { //Linear search for searching reservation names by reservation name
 				if (nameToSearch == guests[i].fullName) {
-					cout << endl << "Name\t\t\t" << "Room\t\t" << "Phone\t\t\t" << "Bill\t\t" << "ID\t\t" << endl;
+					cout << endl << "Name\t\t\t" << "Room\t\t" << "Bill\t\t" << "ID\t\t" << endl;
 					count += 1;
-					cout << guests[i].fullName << "\t\t" << guests[i].roomNumber << "\t\t" << guests[i].phoneNum << "\t\t" << guests[i].totalBill << "$" << "\t\t" << guests[i].reservationId << endl;
+					cout << guests[i].fullName << "\t\t" << guests[i].roomNumber << "\t\t" << guests[i].totalBill << "$" << "\t\t" << guests[i].reservationId << endl;
 					found = true;
 				}
 				else if (count == 0) {
@@ -299,7 +299,7 @@ void SearchReservations(Room& room, Guest guests[])
 
 }
 
-float Discount(float bill)
+double discount(int bill)
 {
 	int rnd = rand() % 3 + 1;
 	if (rnd == 1) {
