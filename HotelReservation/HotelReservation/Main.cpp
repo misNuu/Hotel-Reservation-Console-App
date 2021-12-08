@@ -2,6 +2,7 @@
 #include <string>
 #include <ctime>
 #include <vector>
+#include <iomanip>
 
 using namespace std;
 
@@ -31,7 +32,7 @@ void printMenuChoices();
 void reservationMenu(Room&, Guest[MAX_GUESTS]);
 void searchReservations(Room&, Guest[MAX_GUESTS]);
 bool isAvailable(Room&); // Checks if room is available for reservation
-int countHowManyAvailable(Room&);
+int countHowManyAvailable(Room&); // Returns how many rooms are free
 int intInput(); // Used for all integer inputs, handles errors
 double discount(int bill); // Generates discount based on random number
 
@@ -57,15 +58,18 @@ int intInput()
 {
 	int choice = 0;
 
-	cin >> choice;
+	cin >> setw(1) >> choice;
 	while (cin.fail()) {
 		cout << endl << "Incorrect input! Try a number: ";
 
 		cin.clear();
 		cin.ignore(INT_MAX, '\n');
 
-		cin >> choice;
+		cin >> setw(1) >> choice;
 	}
+
+	cin.clear();
+	cin.ignore(INT_MAX, '\n');
 
 	return choice;
 }
@@ -76,14 +80,11 @@ Room initializeRooms()
 
 	srand(time(0));
 
-	//room.roomsCount = 2 * (rand() % MAX_ROOMS + 1) ; // Generate an even room count between 40 - 300
-	room.roomsCount = MAX_ROOMS;
+	room.roomsCount = (rand() % (MAX_ROOMS / 2 - 20) + 20) * 2; // Generate an even room count between 40 - MAX_ROOMS
 
 	for (int i = 0; i <= room.roomsCount; i++) { // Initialize all rooms as available
 		room.roomsAvailability.push_back(1);
 	}
-
-	//cout << "Generated a total of " << room.roomsCount << " rooms!" << endl << endl;
 
 	return room;
 }
@@ -105,15 +106,15 @@ void mainMenu(Room &room)
 			break;
 		case 2:
 			cout << "------------------------------------------------" << endl;
+			searchReservations(room, guests);
+			break;
+		case 3:
+			cout << "------------------------------------------------" << endl;
 			cout << "Type\t\tPrice ($/night)" << endl;
 			cout << "------------------------------------------------" << endl;
 			cout << "Single\t\t100" << endl;
 			cout << "Double\t\t150" << endl;
 			cout << "------------------------------------------------" << endl;
-			break;
-		case 3:
-			cout << "------------------------------------------------" << endl;
-			searchReservations(room, guests);
 			break;
 		case 4:
 			cout << "Exiting program..." << endl;
@@ -130,8 +131,8 @@ void printMenuChoices()
 {
 	cout << "What would you like to do?" << endl;
 	cout << "1. Reserve a room" << endl;
-	cout << "2. Check pricing" << endl;
-	cout << "3. Search room reservations" << endl;
+	cout << "2. Search room reservations" << endl;
+	cout << "3. Check pricing" << endl;
 	cout << "4. Exit program" << endl;
 }
 
@@ -207,8 +208,6 @@ void reservationMenu(Room& room, Guest guests[])
 		guests[i].howManyNights = choice;
 
 		cout << endl << "Enter your full name: ";
-		//cin >> guests[i].fullName;
-		cin.ignore();
 		getline(cin, guests[i].fullName);
 
 		guests[i].roomNumber = roomNumber;
@@ -218,9 +217,11 @@ void reservationMenu(Room& room, Guest guests[])
 		if (guests[i].roomNumber <= room.roomsCount / 2)
 		{
 			bill = guests[i].howManyNights * room.singleRoomPrice;
+			guests[i].roomType = "Single";
 		}
 		else if (guests[i].roomNumber > room.roomsCount / 2) {
 			bill = guests[i].howManyNights * room.doubleRoomPrice;
+			guests[i].roomType = "Double";
 		}
 
 		room.roomsAvailability[guests[i].roomNumber] = 0; // Mark room as reserved by inserting a value of 0 (false)
@@ -254,14 +255,16 @@ void searchReservations(Room& room, Guest guests[])
 	{
 		case 1:
 			int idToSearch;
-			cout << "Enter reservation ID to search: ";
+			cout << endl << "Enter reservation ID to search: ";
 			idToSearch = intInput();
 
-			for (int i = 0; i <= MAX_GUESTS; i++) { //Linear search for searching reservation names by reservation ID
+			cout << "Found reservation(s):" << endl;
+
+			for (int i = 0; i <= MAX_GUESTS; i++) { // Linear search for searching reservation names by reservation ID
 				if (idToSearch == guests[i].reservationId) {
-					cout << endl << "Name\t\t\t" << "Room\t\t" << "Bill\t\t" << "ID\t\t" << endl;
+					cout << endl << left << setw(25) << "Name" << left << setw(20) << "Type" << left << setw(20) << "Room" << left << setw(20) << "Total ($)" << left << setw(20) << "ID" << endl;
 					count += 1;
-					cout << guests[i].fullName << "\t\t" << guests[i].roomNumber << "\t\t" << guests[i].totalBill << "$" << "\t\t" << guests[i].reservationId << endl;
+					cout << left << setw(25) << guests[i].fullName << left << setw(20) << guests[i].roomType << left << setw(20) << guests[i].roomNumber << left << setw(20) << guests[i].totalBill << setw(20) << guests[i].reservationId << endl;
 					found = true;
 				}
 				else if (count == 0) {
@@ -274,15 +277,16 @@ void searchReservations(Room& room, Guest guests[])
 			break;
 		case 2:
 			string nameToSearch;
-			cout << "Enter a full name to search: ";
-			cin.ignore();
+			cout << endl << "Enter a full name to search: ";
 			getline(cin, nameToSearch);
 
-			for (int i = 0; i <= MAX_GUESTS; i++) { //Linear search for searching reservation names by reservation name
+			cout << "Found reservation(s):" << endl;
+
+			for (int i = 0; i <= MAX_GUESTS; i++) { // Linear search for searching reservation names by reservation name
 				if (nameToSearch == guests[i].fullName) {
-					cout << endl << "Name\t\t\t" << "Room\t\t" << "Bill\t\t" << "ID\t\t" << endl;
+					cout << endl << left << setw(25) << "Name" << left << setw(20) << "Type" << left << setw(20) << "Room" << left << setw(20) << "Total ($)" << left << setw(20) << "ID" << endl;
 					count += 1;
-					cout << guests[i].fullName << "\t\t" << guests[i].roomNumber << "\t\t" << guests[i].totalBill << "$" << "\t\t" << guests[i].reservationId << endl;
+					cout << left << setw(25) << guests[i].fullName << left << setw(20) << guests[i].roomType << left << setw(20) << guests[i].roomNumber << left << setw(20) << guests[i].totalBill << setw(20) << guests[i].reservationId << endl;
 					found = true;
 				}
 				else if (count == 0) {
@@ -295,7 +299,7 @@ void searchReservations(Room& room, Guest guests[])
 			break;
 	}
 	
-	cout << "------------------------------------------------" << endl;
+	cout << "--------------------------------------------------------------------------------------------------" << endl;
 
 }
 
