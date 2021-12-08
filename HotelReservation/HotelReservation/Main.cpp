@@ -104,15 +104,15 @@ void mainMenu(Room &room)
 
 		switch (userChoice)
 		{
-		case 1:
+		case 1: // For making reservations
 			cout << "------------------------------------------------" << endl;
 			reservationMenu(room, guests);
 			break;
-		case 2:
+		case 2: // For searching reservations
 			cout << "------------------------------------------------" << endl;
 			searchReservations(room, guests);
 			break;
-		case 3:
+		case 3: // Prints hotel room pricing
 			cout << "------------------------------------------------" << endl;
 			cout << "Type\t\tPrice ($/night)" << endl;
 			cout << "------------------------------------------------" << endl;
@@ -120,9 +120,9 @@ void mainMenu(Room &room)
 			cout << "Double\t\t150" << endl;
 			cout << "------------------------------------------------" << endl;
 			break;
-		case 4:
+		case 4: // Exits program
 			cout << "Exiting program..." << endl;
-			break; // Exit
+			break;
 		default:
 			cout << endl;
 			cout << "Incorrect input! Enter a number between 1 - 4" << endl << endl;
@@ -145,7 +145,7 @@ int countHowManyAvailable(Room& room)
 {
 	int count = 0;
 	for (int i = 1; i <= room.roomsCount; i++) {
-		if (room.roomsAvailability[i] == 1) {
+		if (room.roomsAvailability[i] == 1) { // 1 is equal to a room being available in the array so if we detect that, we can add + 1 to count
 			count += 1;
 		}
 	}
@@ -154,7 +154,7 @@ int countHowManyAvailable(Room& room)
 
 void reservationMenu(Room& room, Guest guests[])
 {
-	static int i = 0;
+	static int i = 0; // Used for storing guests in to their own index in Guest struct array
 	bool roomIsAvailable;
 	int bill = 0;
 	int choice;
@@ -169,23 +169,22 @@ void reservationMenu(Room& room, Guest guests[])
 	choice = intInput();
 
 	switch (choice) {
-	case 1:
+	case 1: // If user wants to select room number himself
 		do {
 			cout << endl << "Enter a room number that you would like to reserve: ";
 			choice = intInput();
-		} while (choice > room.roomsCount || choice <= 0);
+		} while (choice > room.roomsCount || choice <= 0); // Index 0 is skipped on purpose
 
 		roomNumber = choice;
 		break;
-	case 2:
-		// If generated room number is not available, generate a new one
+	case 2: // If user wants to generate a random room number
 		do {
 			rnd = rand() % room.roomsCount + 1;
 			roomIsAvailable = isAvailable(room, rnd);
 			if (countHowManyAvailable(room) == 0) { // If no rooms are available, stop trying to generate a room number and break out of loop
 				break;
 			}
-		} while (!roomIsAvailable);
+		} while (!roomIsAvailable); // If generated room number is not available, generate a new one
 
 		roomNumber = rnd;
 		cout << "We picked room number " << roomNumber << " for you." << endl;
@@ -194,7 +193,7 @@ void reservationMenu(Room& room, Guest guests[])
 		cout << "Incorrect input! Enter a number between 1 - 2" << endl;
 	}
 
-	roomIsAvailable = isAvailable(room, roomNumber);
+	roomIsAvailable = isAvailable(room, roomNumber); // Checks if the room is available
 
 	if (roomIsAvailable)
 	{
@@ -209,17 +208,17 @@ void reservationMenu(Room& room, Guest guests[])
 
 		guests[i].reservationId = rand() % 99999 + 10000; // Generate a reservation id for guests
 
-		if (guests[i].roomNumber <= room.roomsCount / 2)
+		if (guests[i].roomNumber <= room.roomsCount / 2) // If room number is smaller than half of the total number of rooms then it's a single room
 		{
 			bill = guests[i].howManyNights * room.singleRoomPrice;
 			guests[i].roomType = "Single";
 		}
-		else if (guests[i].roomNumber > room.roomsCount / 2) {
+		else if (guests[i].roomNumber > room.roomsCount / 2) { // If room number is bigger than half of the total number of rooms then it's a double room
 			bill = guests[i].howManyNights * room.doubleRoomPrice;
 			guests[i].roomType = "Double";
 		}
 
-		room.roomsAvailability[guests[i].roomNumber] = 0; // Mark room as reserved by inserting a value of 0 (false)
+		room.roomsAvailability[guests[i].roomNumber] = 0; // Mark room as reserved by inserting a value of 0 in to the array
 
 		cout << endl << "Room number " << guests[i].roomNumber << " reserved succesfully for: " << guests[i].fullName << endl;
 		cout << "Reservation ID: " << guests[i].reservationId << endl;
@@ -227,12 +226,12 @@ void reservationMenu(Room& room, Guest guests[])
 		cout << "Total bill: " << guests[i].totalBill << "$" << endl;
 		cout << "------------------------------------------------" << endl;
 	}
-	else {
+	else { // If selected or generated room is not available, tell the user
 		cout << endl << "THAT ROOM IS ALREADY RESERVED! Try another one." << endl << endl;
 		cout << "------------------------------------------------" << endl;
 	}
 	
-	i+=1; // Iterate index by 1 everytime this function is called, so next guest will be stored in next index in the array
+	i+=1; // Iterate index by 1 everytime this function is finished, so that the next guest will be stored in next index in the array
 }
 
 void searchReservations(Room& room, Guest guests[])
@@ -240,7 +239,6 @@ void searchReservations(Room& room, Guest guests[])
 	int choice;
 	bool found;
 	int count = 0;
-
 	cout << "You can search reservations either by name or by reservation ID." << endl << endl;
 	cout << "What would you like to to?" << endl << "1. Search by reservation ID" << endl << "2. Search by name" << endl << endl;
 	cout << "Your choice: ";
@@ -255,7 +253,7 @@ void searchReservations(Room& room, Guest guests[])
 
 			cout << endl << "Found reservation(s):" << endl;
 
-			for (int i = 0; i <= MAX_GUESTS; i++) { // Linear search for searching reservation names by reservation ID
+			for (int i = 0; i <= MAX_GUESTS; i++) { // Linear search for searching reservations by reservation ID
 				if (idToSearch == guests[i].reservationId) {
 					cout << endl << left << setw(25) << "Name" << left << setw(20) << "Type" << left << setw(20) << "Room" << left << setw(20) << "Total ($)" << left << setw(20) << "ID" << endl;
 					count += 1;
@@ -277,7 +275,7 @@ void searchReservations(Room& room, Guest guests[])
 
 			cout << endl << "Found reservation(s):" << endl;
 
-			for (int i = 0; i <= MAX_GUESTS; i++) { // Linear search for searching reservation names by reservation name
+			for (int i = 0; i <= MAX_GUESTS; i++) { // Linear search for searching reservations by reservation name
 				if (nameToSearch == guests[i].fullName) {
 					cout << endl << left << setw(25) << "Name" << left << setw(20) << "Type" << left << setw(20) << "Room" << left << setw(20) << "Total ($)" << left << setw(20) << "ID" << endl;
 					count += 1;
@@ -301,6 +299,7 @@ void searchReservations(Room& room, Guest guests[])
 double discount(int bill)
 {
 	int rnd = rand() % 3 + 1;
+
 	if (rnd == 1) {
 		cout << "You got a 10% discount!" << endl;
 		return bill - (bill * 0.10); // 10 % discount
