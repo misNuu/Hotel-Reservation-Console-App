@@ -28,7 +28,6 @@ struct Room {
 // Function prototypes
 Room initializeRooms();
 void mainMenu(Room&);
-void printMenuChoices();
 void reservationMenu(Room&, Guest[MAX_GUESTS]);
 void searchReservations(Room&, Guest[MAX_GUESTS]);
 bool isAvailable(Room&); // Checks if room is available for reservation
@@ -94,7 +93,12 @@ void mainMenu(Room &room)
 	Guest guests[MAX_GUESTS];
 	int userChoice;
 	do {
-		printMenuChoices();
+		cout << "What would you like to do?" << endl;
+		cout << "1. Reserve a room" << endl;
+		cout << "2. Search room reservations" << endl;
+		cout << "3. Check pricing" << endl;
+		cout << "4. Exit program" << endl;
+
 		cout << endl << "Your choice: ";
 		userChoice = intInput();
 
@@ -125,15 +129,6 @@ void mainMenu(Room &room)
 		}
 
 	} while (userChoice != 4);
-}
-
-void printMenuChoices()
-{
-	cout << "What would you like to do?" << endl;
-	cout << "1. Reserve a room" << endl;
-	cout << "2. Search room reservations" << endl;
-	cout << "3. Check pricing" << endl;
-	cout << "4. Exit program" << endl;
 }
 
 bool isAvailable(Room &room, int roomNumber)
@@ -168,13 +163,21 @@ void reservationMenu(Room& room, Guest guests[])
 
 	cout << "We have a total of " << countHowManyAvailable(room) << " room(s) free." << endl;
 	cout << "Rooms 1 - " << room.roomsCount / 2 << " are for a single person (single rooms)" << endl << "Rooms " << room.roomsCount / 2 + 1 << " - " << room.roomsCount << " are for two people (double rooms)" << endl << endl;
-	cout << "You can choose a room yourself or we can choose for you. What would you like to do?" << endl << "1. Let us choose for you" << endl << "2. I'll pick myself" << endl;
+	cout << "You can choose a room yourself or we can choose for you" << endl << "What would you like to do ?" << endl << "1. I'll pick myself" << endl << "2. Let us choose for you" << endl;
 
 	cout << endl << "Your choice: ";
 	choice = intInput();
 
 	switch (choice) {
 	case 1:
+		do {
+			cout << endl << "Enter a room number that you would like to reserve: ";
+			choice = intInput();
+		} while (choice > room.roomsCount || choice <= 0);
+
+		roomNumber = choice;
+		break;
+	case 2:
 		// If generated room number is not available, generate a new one
 		do {
 			rnd = rand() % room.roomsCount + 1;
@@ -186,14 +189,6 @@ void reservationMenu(Room& room, Guest guests[])
 
 		roomNumber = rnd;
 		cout << "We picked room number " << roomNumber << " for you." << endl;
-		break;
-	case 2:
-		do {
-			cout << "Enter a room number that you would like to reserve: ";
-			choice = intInput();
-		} while (choice > room.roomsCount || choice <= 0);
-
-		roomNumber = choice;
 		break;
 	default:
 		cout << "Incorrect input! Enter a number between 1 - 2" << endl;
@@ -246,7 +241,7 @@ void searchReservations(Room& room, Guest guests[])
 	bool found;
 	int count = 0;
 
-	cout << "You can search reservations either by name or by reservation ID." << endl;
+	cout << "You can search reservations either by name or by reservation ID." << endl << endl;
 	cout << "What would you like to to?" << endl << "1. Search by reservation ID" << endl << "2. Search by name" << endl << endl;
 	cout << "Your choice: ";
 	choice = intInput();
@@ -258,7 +253,7 @@ void searchReservations(Room& room, Guest guests[])
 			cout << endl << "Enter reservation ID to search: ";
 			idToSearch = intInput();
 
-			cout << "Found reservation(s):" << endl;
+			cout << endl << "Found reservation(s):" << endl;
 
 			for (int i = 0; i <= MAX_GUESTS; i++) { // Linear search for searching reservation names by reservation ID
 				if (idToSearch == guests[i].reservationId) {
@@ -280,7 +275,7 @@ void searchReservations(Room& room, Guest guests[])
 			cout << endl << "Enter a full name to search: ";
 			getline(cin, nameToSearch);
 
-			cout << "Found reservation(s):" << endl;
+			cout << endl << "Found reservation(s):" << endl;
 
 			for (int i = 0; i <= MAX_GUESTS; i++) { // Linear search for searching reservation names by reservation name
 				if (nameToSearch == guests[i].fullName) {
