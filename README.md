@@ -1,3 +1,0 @@
-# oskari.a.lindroos
-
-# Testi
