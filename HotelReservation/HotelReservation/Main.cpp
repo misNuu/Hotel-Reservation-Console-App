@@ -155,7 +155,7 @@ int countHowManyAvailable(Room& room)
 void reservationMenu(Room& room, Guest guests[])
 {
 	static int i = 0; // Used for storing guests in to their own index in Guest struct array
-	bool roomIsAvailable;
+	bool roomIsAvailable = false;
 	int bill = 0;
 	int choice;
 	int roomNumber = 0;
@@ -176,6 +176,7 @@ void reservationMenu(Room& room, Guest guests[])
 		} while (choice > room.roomsCount || choice <= 0); // Index 0 is skipped on purpose
 
 		roomNumber = choice;
+		roomIsAvailable = isAvailable(room, roomNumber); // Checks if the room is available
 		break;
 	case 2: // If user wants to generate a random room number
 		do {
@@ -188,12 +189,12 @@ void reservationMenu(Room& room, Guest guests[])
 
 		roomNumber = rnd;
 		cout << "We picked room number " << roomNumber << " for you." << endl;
+		roomIsAvailable = isAvailable(room, roomNumber); // Checks if the room is available
 		break;
 	default:
 		cout << "Incorrect input! Enter a number between 1 - 2" << endl;
 	}
 
-	roomIsAvailable = isAvailable(room, roomNumber); // Checks if the room is available
 
 	if (roomIsAvailable)
 	{
@@ -206,7 +207,7 @@ void reservationMenu(Room& room, Guest guests[])
 
 		guests[i].roomNumber = roomNumber;
 
-		guests[i].reservationId = rand() % 99999 + 10000; // Generate a reservation id for guests
+		guests[i].reservationId = rand() % (99999 - 10000) + 10000; // Generate a reservation id for guests
 
 		if (guests[i].roomNumber <= room.roomsCount / 2) // If room number is smaller than half of the total number of rooms then it's a single room
 		{
@@ -231,7 +232,7 @@ void reservationMenu(Room& room, Guest guests[])
 		cout << "------------------------------------------------" << endl;
 	}
 	
-	i+=1; // Iterate index by 1 everytime this function is finished, so that the next guest will be stored in next index in the array
+	i+=1; // Iterate index by 1 everytime this function is finished, so that the next guest will be stored in the next index of the array
 }
 
 void searchReservations(Room& room, Guest guests[])
