@@ -154,7 +154,7 @@ int countHowManyAvailable(Room& room)
 
 void reservationMenu(Room& room, Guest guests[])
 {
-	static int i = 0; // Used for storing guests in to their own index in Guest struct array
+	static int i = 0;
 	bool roomIsAvailable = false;
 	int bill = 0;
 	int choice;
@@ -198,8 +198,10 @@ void reservationMenu(Room& room, Guest guests[])
 
 	if (roomIsAvailable)
 	{
-		cout << endl << "How many nights would you like to stay?: ";
-		choice = intInput();
+		do {
+			cout << endl << "How many nights would you like to stay?: ";
+			choice = intInput();
+		} while (choice <= 0); // Keep asking until the user inputs a number larger than 0
 		guests[i].howManyNights = choice;
 
 		cout << endl << "Enter your full name: ";
@@ -223,6 +225,7 @@ void reservationMenu(Room& room, Guest guests[])
 
 		cout << endl << "Room number " << guests[i].roomNumber << " reserved succesfully for: " << guests[i].fullName << endl;
 		cout << "Reservation ID: " << guests[i].reservationId << endl;
+		cout << "Staying for: " << guests[i].howManyNights << " night(s)" << endl;
 		guests[i].totalBill = discount(bill); // Checks if a discount will be applied to total price
 		cout << "Total bill: " << guests[i].totalBill << "$" << endl;
 		cout << "------------------------------------------------" << endl;
@@ -256,9 +259,9 @@ void searchReservations(Room& room, Guest guests[])
 
 			for (int i = 0; i <= MAX_GUESTS; i++) { // Linear search for searching reservations by reservation ID
 				if (idToSearch == guests[i].reservationId) {
-					cout << endl << left << setw(25) << "Name" << left << setw(20) << "Type" << left << setw(20) << "Room" << left << setw(20) << "Total ($)" << left << setw(20) << "ID" << endl;
+					cout << left << setw(25) << "Name" << left << setw(20) << "Type" << left << setw(20) << "Room" << left << setw(20) << "Night(s)" << left << setw(20) << "Total ($)" << left << setw(20) << "ID" << endl;
 					count += 1;
-					cout << left << setw(25) << guests[i].fullName << left << setw(20) << guests[i].roomType << left << setw(20) << guests[i].roomNumber << left << setw(20) << guests[i].totalBill << setw(20) << guests[i].reservationId << endl;
+					cout << left << setw(25) << guests[i].fullName << left << setw(20) << guests[i].roomType << left << setw(20) << guests[i].roomNumber << left << setw(20) << guests[i].howManyNights << left << setw(20) << guests[i].totalBill << setw(20) << guests[i].reservationId << endl;
 					found = true;
 				}
 				else if (count == 0) {
@@ -278,9 +281,9 @@ void searchReservations(Room& room, Guest guests[])
 
 			for (int i = 0; i <= MAX_GUESTS; i++) { // Linear search for searching reservations by reservation name
 				if (nameToSearch == guests[i].fullName) {
-					cout << endl << left << setw(25) << "Name" << left << setw(20) << "Type" << left << setw(20) << "Room" << left << setw(20) << "Total ($)" << left << setw(20) << "ID" << endl;
+					cout << left << setw(25) << "Name" << left << setw(20) << "Type" << left << setw(20) << "Room" << left << setw(20) << "Night(s)" << left << setw(20) << "Total ($)" << left << setw(20) << "ID" << endl;
 					count += 1;
-					cout << left << setw(25) << guests[i].fullName << left << setw(20) << guests[i].roomType << left << setw(20) << guests[i].roomNumber << left << setw(20) << guests[i].totalBill << setw(20) << guests[i].reservationId << endl;
+					cout << left << setw(25) << guests[i].fullName << left << setw(20) << guests[i].roomType << left << setw(20) << guests[i].roomNumber << left << setw(20) << guests[i].howManyNights << left << setw(20) << guests[i].totalBill << setw(20) << guests[i].reservationId << endl;
 					found = true;
 				}
 				else if (count == 0) {
